@@ -11,6 +11,7 @@ Belthasar, known in Japan as *Gasch* (ガッシュ Gasshu), also known as the Gu
 - Tree-based (filesystem-like) document persistence
 - Picture placeholders
 - Multi-user, authentication and real-time collaboration
+- Live recording (while taking notes) with automatic timecode inserts
 
 ## Project organization
 

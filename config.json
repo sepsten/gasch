@@ -1,0 +1,10 @@
+{
+  "users": [
+    {
+      "name": "test",
+      "passwordHash": "dfmsdjfglk"
+    }
+  ],
+  
+  "secret": "abcdefghijklmnopqrstuvwxyz"
+}
