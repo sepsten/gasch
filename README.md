@@ -53,11 +53,11 @@ Gasch's API uses JSON Web Tokens with the following claims:
 **PUT.** Updates a specific document.
 **DELETE.** Deletes a specific document.
 
-### /api/assets/
+#### /api/assets/
 
 **POST.** Uploads a new asset.
 
-### /api/assets/[id]
+#### /api/assets/[id]
 
 **GET.** Returns the raw asset data. Response type won't be JSON.
 **HEAD.** Only returns the HTTP headers indicating content type and size.

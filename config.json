@@ -2,9 +2,9 @@
   "users": [
     {
       "name": "test",
-      "passwordHash": "dfmsdjfglk"
+      "password": "test"
     }
   ],
-  
+
   "secret": "abcdefghijklmnopqrstuvwxyz"
 }
