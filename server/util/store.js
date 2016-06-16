@@ -28,6 +28,10 @@ var Store = function() {
   this._delete = function(key) {
     return map.delete(key);
   };
+
+  this._keys = function() {
+    return Array.from(map.keys());
+  };
 };
 
 module.exports = Store;

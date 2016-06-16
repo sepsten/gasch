@@ -54,6 +54,11 @@ var DocumentModel = function() {
   this.documentExists = function(id, cb) {
     cb(null, this._exists(id));
   };
+
+  // Doesn't exist in the DocumentStore API
+  this.listDocuments = function(cb) {
+    cb(null, this._keys());
+  };
 };
 
 util.inherits(DocumentModel, Store);

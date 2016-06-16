@@ -3,7 +3,7 @@
  * @author sepsten
  */
 
-var config = require("./../../config.json");
+var config = require("./../config");
 
 /**
  * Fixed user model. Users and their password are defined in `config.json`.

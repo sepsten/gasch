@@ -3,7 +3,7 @@
  * @author sepsten
  */
 
-var config = require("./../../config.json"),
+var config = require("./../config"),
     User = require("./user"),
     Store = require("./../util/store"),
     util = require("util"),
@@ -51,15 +51,12 @@ var TokenModel = function() {
 
   /**
    * Revokes a valid token. Think «logout».
+   * Doesn't perform any check as they should be done by the authentication
+   * middleware.
    */
-  this.revokeToken = function(token, cb) {
-    var self = this;
-    this.verifyToken(token, function(err, decoded) {
-      if(err)
-        return cb(err);
-
-      self._delete(decoded.jti);
-    });
+  this.revokeToken = function(jti, cb) {
+    this._delete(jti);
+    cb(null);
   };
 
   /**
