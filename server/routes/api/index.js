@@ -9,21 +9,27 @@ var express = require("express"),
     documentsEndpoint = require("./documents"),
     tokenEndpoint = require("./token"),
     auth = require("./../../authmw"),
-    APIError = require("./../../errors").APIError;
+    errors = require("./../../errors");
 
 router.use(bodyParser.json());
 router.use("/token", tokenEndpoint);
 router.use("/documents", auth(), documentsEndpoint);
 
-router.get("/teapot", function(req, res, next) {
-  next(new APIError(418, "Am I really a teapot?"));
+router.get("/test", function(req, res, next) {
+  throw new Error("im crazyaaayYYY");
 });
 
+// Default middleware
+router.use(function(req, res, next) {
+  next(new errors.NotImplemented);
+});
+
+// API error handler
 router.use(function(err, req, res, next) {
-  if(err instanceof APIError)
-    res.status(err.status).json(err.toJSON());
-  else
-    res.sendStatus(500); // unknown error
+  if(!(err instanceof errors.APIError))
+    return next(err);
+
+  res.status(err.httpCode).json(err.toJSON());
 });
 
 module.exports = router;

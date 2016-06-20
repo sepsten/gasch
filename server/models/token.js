@@ -8,7 +8,8 @@ var config = require("./../config"),
     Store = require("./../util/store"),
     util = require("util"),
     jwt = require("jsonwebtoken"),
-    shortid = require("shortid");
+    shortid = require("shortid"),
+    errors = require("./../errors");
 
 /**
  * The token model is the core of the authorization server. It generates, checks
@@ -30,7 +31,7 @@ var TokenModel = function() {
     // 1. Check login details
     User.authenticateUser(username, password, function(err, authenticated) {
       if(!authenticated)
-        return cb(new Error("Wrong login credentials"));
+        return cb(new errors.WrongCredentials);
 
       // 2. Generate token id
       var jti = shortid.generate();
@@ -70,11 +71,11 @@ var TokenModel = function() {
       {algorithms: ["HS256"], issuer: "gasch"},
       function(err, decoded) {
         if(err)
-          return cb(new Error("Invalid token"));
+          return cb(new errors.BadJWTSignature);
 
         // 2. Check for existence.
         if(!self._exists(decoded.jti))
-          cb(new Error("Expired token"));
+          cb(new errors.ExpiredToken);
         else
           cb(null, decoded);
       });

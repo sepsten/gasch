@@ -4,6 +4,7 @@
  */
 
 var Store = require("./../util/store"),
+    errors = require("./../errors"),
     util = require("util");
 
 // cf https://github.com/substance/substance/blob/devel/collab/DocumentStore.js
@@ -22,7 +23,7 @@ var DocumentModel = function() {
       props.documentId = Math.round(Math.random() * 1e8).toString(16);
 
     if(this._exists(props.documentId))
-      return cb(new Error("Could not create because document already exists."));
+      return cb(new errors.DocumentAlreadyExists);
 
     this._save(props.documentId, props);
     this.getDocument(props.documentId, cb);
@@ -31,14 +32,14 @@ var DocumentModel = function() {
   this.getDocument = function(id, cb) {
     var doc = this._get(id);
     if(!doc)
-      return cb(new Error("Document not found!"));
+      return cb(new errors.DocumentNotFound);
     cb(null, doc);
   };
 
   // WARNING: FULL REPLACE
   this.updateDocument = function(id, newProps, cb) {
     if(!this._exists(id))
-      return cb(new Error("Document not found!"));
+      return cb(new errors.DocumentNotFound);
     this._save(id, newProps);
     this.getDocument(id, cb);
   };
@@ -46,7 +47,7 @@ var DocumentModel = function() {
   this.deleteDocument = function(id, cb) {
     var doc = this._get(id);
     if(!doc)
-      return cb(new Error("Document not found!"));
+      return cb(new errors.DocumentNotFound);
     this._delete(id);
     cb(null, doc);
   };

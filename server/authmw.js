@@ -3,30 +3,37 @@
  * @author sepsten
  */
 
-var Token = require("./models/token");
+var config = require("./config"),
+    Token = require("./models/token"),
+    InvalidAuth = require("./errors").InvalidAuthHeader;
 
 /**
  * Authentication middleware in the Connect format.
- * Performs basic verifications. One path can be excluded.
+ * Performs basic verifications.
  */
 var AuthMW = function() {
   return function(req, res, next) {
+    // TO BE REMOVED?
+    if(!config.enableAuth)
+      return next();
+
     // Parse bearer token
     var bearer = req.get("Authorization");
 
       // Check if present
     if(!bearer)
-      return res.status(401).json({error: "Bearer token needed"});
+      return next(new InvalidAuth("Authorization header with bearer token" +
+        " required."));
 
       // Check if valid
     bearer = bearer.split(" ");
     if(bearer[0] !== "Bearer" || bearer.length !== 2)
-      return res.status(401).json({error: "Invalid authorization header"});
+      return next(new InvalidAuth("Invalid bearer token: syntax error."));
 
     // Check token validity
     Token.verifyToken(bearer[1], function(err, decoded) {
       if(err)
-        return res.status(401).json(err);
+        return next(err);
 
       // Valid token!
       req.token = decoded;
