@@ -71,6 +71,8 @@ proto(102, "WrongLoginCredentials", "Wrong login credentials: can't" +
 proto(103, "BadJWTSignature", "Bad token signature: can't authenticate user.",
   401);
 proto(104, "ExpiredToken", "Expired token: cant't authenticate user.", 401);
+proto(105, "LoginCredentialsRequired", "Login credentials must be passed.",
+  401);
 
 // Document errors 110-119
 proto(110, "DocumentNotFound", "Document not found.", 404);

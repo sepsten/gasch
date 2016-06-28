@@ -9,7 +9,8 @@ var config = require("./../config"),
     util = require("util"),
     jwt = require("jsonwebtoken"),
     shortid = require("shortid"),
-    errors = require("./../errors");
+    errors = require("./../errors"),
+    co = require("co");
 
 /**
  * The token model is the core of the authorization server. It generates, checks
@@ -25,28 +26,29 @@ var TokenModel = function() {
   /**
    * Checks the login details and may return a valid token.
    */
-  this.requestToken = function(username, password, cb) {
+  this.requestToken = function(username, password) {
     var self = this;
 
-    // 1. Check login details
-    User.authenticateUser(username, password, function(err, authenticated) {
+    return co(function*() {
+      // 1. Check login details
+      let authenticated = yield User.authenticateUser(username, password);
       if(!authenticated)
-        return cb(new errors.WrongCredentials);
+        throw new errors.WrongCredentials;
 
-      // 2. Generate token id
-      var jti = shortid.generate();
+        // 2. Generate token id
+        var jti = shortid.generate();
 
-      // 3. Generate token with config.secret
-      var token = jwt.sign({
-        iss: "gasch", // Issuer
-        iat: Math.floor(Date.now() / 1000), // Issued at (in seconds)
-        jti: jti, // JWT ID
-        "gasch:user": username
-      }, config.secret);
+        // 3. Generate token with config.secret
+        var token = jwt.sign({
+          iss: "gasch", // Issuer
+          iat: Math.floor(Date.now() / 1000), // Issued at (in seconds)
+          jti: jti, // JWT ID
+          "gasch:user": username
+        }, config.secret);
 
-      // 4. Store and send
-      self._save(jti, token);
-      cb(null, token);
+        // 4. Store and send
+        self._save(jti, token);
+        return token;
     });
   };
 
@@ -55,30 +57,34 @@ var TokenModel = function() {
    * Doesn't perform any check as they should be done by the authentication
    * middleware.
    */
-  this.revokeToken = function(jti, cb) {
-    this._delete(jti);
-    cb(null);
+  this.revokeToken = function(jti) {
+    var self = this;
+    return co(function*() {
+      self._delete(jti);
+    });
   };
 
   /**
    * Verifies the authenticity of a token with its signature.
    */
-  this.verifyToken = function(token, cb) {
+  this.verifyToken = function(token) {
     var self = this;
 
-    // 1. Check for valid signature
-    jwt.verify(token, config.secret,
-      {algorithms: ["HS256"], issuer: "gasch"},
-      function(err, decoded) {
-        if(err)
-          return cb(new errors.BadJWTSignature);
+    return new Promise((resolve, reject) => {
+      // 1. Check for valid signature
+      jwt.verify(token, config.secret,
+        {algorithms: ["HS256"], issuer: "gasch"},
+        function(err, decoded) {
+          if(err)
+            return reject(new errors.BadJWTSignature);
 
-        // 2. Check for existence.
-        if(!self._exists(decoded.jti))
-          cb(new errors.ExpiredToken);
-        else
-          cb(null, decoded);
-      });
+          // 2. Check for existence.
+          if(!self._exists(decoded.jti))
+            reject(new errors.ExpiredToken);
+          else
+            resolve(decoded);
+        });
+    });
   };
 };
 

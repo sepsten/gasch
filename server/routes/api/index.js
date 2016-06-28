@@ -3,33 +3,47 @@
  * @author sepsten
  */
 
-var express = require("express"),
-    bodyParser = require("body-parser"),
-    router = express.Router(),
+var bodyParser = require("koa-bodyparser"),
+    router = require("lucca")("api"),
+    errors = require("./../../errors"),
     documentsEndpoint = require("./documents"),
     tokenEndpoint = require("./token"),
     auth = require("./../../authmw"),
-    errors = require("./../../errors");
+    logger = require("./../../log").logger;
 
-router.use(bodyParser.json());
+// API error handler
+router.use(function*(next) {
+  try {
+    yield next;
+  } catch(err) {
+    if(!(err instanceof errors.APIError)) throw err;
+
+    // Write error to client
+    this.response.status = err.httpCode;
+    this.response.body = err.toJSON();
+
+    // Log important errors
+    if(err.code >= 100 && err.code <= 104) // Check for authentication errors
+      // Error 105 is more a Bad Request error than an authentication error
+      logger.error("Unauthenticated request: ",
+        this.request.method,
+        this.request.originalUrl,
+        this.request.ip,
+        err
+      );
+    else
+      logger.warn("Server error:", err);
+  }
+});
+
+router.use(bodyParser({enableTypes: ["json"]}));
+
 router.use("/token", tokenEndpoint);
 router.use("/documents", auth(), documentsEndpoint);
 
-router.get("/test", function(req, res, next) {
-  throw new Error("im crazyaaayYYY");
-});
-
-// Default middleware
-router.use(function(req, res, next) {
-  next(new errors.NotImplemented);
-});
-
-// API error handler
-router.use(function(err, req, res, next) {
-  if(!(err instanceof errors.APIError))
-    return next(err);
-
-  res.status(err.httpCode).json(err.toJSON());
+// Default endpoint
+router.use(function*() {
+  throw new errors.NotImplemented;
 });
 
 module.exports = router;

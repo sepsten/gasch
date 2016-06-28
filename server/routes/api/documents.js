@@ -3,54 +3,43 @@
  * @author sepsten
  */
 
-var express = require("express"),
-    Document = require("./../../models/document")
-    router = express.Router(),
+var Document = require("./../../models/document"),
+    router = require("lucca")("api:docs"),
     errors = require("./../../errors");
 
-router.get("/", function(req, res, next) {
+router.get("/", function*() {
   Document.listDocuments(function(err, list) {
-    if(err)
-      return next(err);
-
-    res.json(list);
+    if(err) throw err;
+    this.response.body = list;
   });
 });
 
-router.get("/*", function(req, res, next) {
-  Document.getDocument(req.params[0], function(err, doc) {
-    if(err)
-      return next(err);
-
+router.get("/*", function*() {
+  Document.getDocument(this.params[0], function(err, doc) {
+    if(err) throw err;
     res.json(doc);
   });
 });
 
-router.post("/*", function(req, res, next) {
+router.post("/*", function*() {
   req.body.documentId = req.params[0];
   Document.createDocument(req.body, function(err, doc) {
-    if(err)
-      return next(err);
-
-    res.json(doc);
+    if(err) throw err;
+    this.response.body = doc;
   });
 });
 
-router.put("/*", function(req, res, next) {
+router.put("/*", function*() {
   Document.updateDocument(req.params[0], req.body, function(err, doc) {
-    if(err)
-      return next(err);
-
-    res.json(doc);
+    if(err) throw err;
+    this.response.body = doc;
   });
 });
 
-router.delete("/*", function(req, res, next) {
-  Document.deleteDocument(req.params[0], function(err, doc) {
-    if(err)
-      return next(err);
-
-    res.json(doc);
+router.delete("/*", function*() {
+  Document.deleteDocument(this.params[0], function(err, doc) {
+    if(err) throw err;
+    this.response.body = doc;
   });
 });
 

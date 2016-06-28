@@ -3,29 +3,39 @@
  * @author sepsten
  */
 
-var express = require("express")
-    config = require("./server/config");
-var app = express();
+// Server setup
+var koa = require("koa"),
+    http = require("http"),
+    Router = require("lucca"),
+    config = require("./server/config"),
+    logger = require("./server/log").logger;
 
-// Middleware & router imports
-var compression = require("compression"),
-    apiRouter = require("./server/routes/api");
+var app = koa(),
+    mainRouter = Router("main");
 
-// Actual routing
-app.use(compression());
-app.use("/api", apiRouter);
+// Routing
+mainRouter.use("/api", require("./server/routes/api"));
 
-// Server launch
-var server = app.listen(config.port, function() {
-  console.log("Gasch listening on port " + config.port);
+// Boot
+logger.info("Environment: " + config.env);
+app.use(mainRouter);
+var server = http.createServer(app.callback());
+
+server.listen(config.port, function() {
+  logger.info("Listening on port " + config.port);
 });
 
 // Graceful shutdown
 var shutdown = function() {
-  console.log("Gasch is stopping...");
+  logger.info("Gasch is stopping...");
   server.close(function() {
     process.exit(0);
   });
+
+  setTimeout(function() {
+    logger.warn("Time is out: forcing all connections to close.");
+    process.exit(0);
+  }, 1000);
 };
 
 process.on("SIGTERM", shutdown);

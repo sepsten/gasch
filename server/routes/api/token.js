@@ -3,30 +3,27 @@
  * @author sepsten
  */
 
-var express = require("express"),
-    Token = require("./../../models/token")
-    router = express.Router(),
+var Token = require("./../../models/token"),
+    router = require("lucca")("api:token"),
     auth = require("./../../authmw"),
-    APIError = require("./../../errors").APIError;
+    errors = require("./../../errors"),
+    basicAuth = require("basic-auth"),
+    logger = require("./../../log").logger;
 
-// Only endpoint not checked for authentication
-router.post("/", function(req, res) {
-  if(!req.body.username || !req.body.password)
-    return next(new APIError(400, "Username and password required. " +
-      "Please check the documentation."));
-
-  Token.requestToken(req.body.username, req.body.password, function(err, tok) {
-    if(err)
-      return next(new APIError(401, "wrong credentials"));
-
-    res.json({token: tok});
-  });
+router.delete("/", auth(), function*() {
+  yield Token.revokeToken(this.token.jti);
+  this.response.status = 204;
 });
 
-router.delete("/", auth(), function(req, res) {
-  Token.revokeToken(req.token.jti, function(err) {
-    res.sendStatus(204);
-  });
+// Only endpoint not checked for authentication
+router.get("/", function*() {
+  this.response.set("WWW-Authenticate", "Basic realm=\"Gasch REST API\"");
+
+  let cr = basicAuth(this);
+  if(!cr) throw new errors.LoginCredentialsRequired;
+
+  let token = yield Token.requestToken(cr.name, cr.pass);
+  this.response.body = {token};
 });
 
 module.exports = router;

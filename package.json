@@ -16,10 +16,13 @@
     "mocha": "^2.5.3"
   },
   "dependencies": {
-    "body-parser": "^1.15.1",
-    "compression": "^1.6.2",
-    "express": "^4.13.4",
+    "basic-auth": "^1.0.4",
+    "co": "^4.6.0",
     "jsonwebtoken": "^7.0.0",
-    "shortid": "^2.2.6"
+    "koa": "^1.2.0",
+    "koa-bodyparser": "^2.2.0",
+    "lucca": "github:sepsten/lucca#v1.0.0",
+    "shortid": "^2.2.6",
+    "winston": "^2.2.0"
   }
 }

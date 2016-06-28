@@ -8,5 +8,8 @@
     }
   ],
 
-  "secret": "abcdefghijklmnopqrstuvwxyz"
+  "secret": "abcdefghijklmnopqrstuvwxyz",
+
+  "enableAuth": true,
+  "logLevel": "silly"
 }
