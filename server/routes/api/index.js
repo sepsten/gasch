@@ -16,11 +16,11 @@ router.use(function*(next) {
   try {
     yield next;
   } catch(err) {
-    if(!(err instanceof errors.APIError)) throw err;
+    if(!(err instanceof errors.APIError) || err.code === 190) throw err;
 
     // Write error to client
     this.response.status = err.httpCode;
-    this.response.body = err.toJSON();
+    this.response.body = err.toPublic();
 
     // Log important errors
     if(err.code >= 100 && err.code <= 104) // Check for authentication errors
@@ -31,8 +31,6 @@ router.use(function*(next) {
         this.request.ip,
         err
       );
-    else
-      logger.warn("Server error:", err);
   }
 });
 

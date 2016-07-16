@@ -8,10 +8,29 @@ var koa = require("koa"),
     http = require("http"),
     Router = require("lucca"),
     config = require("./server/config"),
-    logger = require("./server/log").logger;
+    logger = require("./server/log").logger,
+    errors = require("./server/errors");
 
 var app = koa(),
     mainRouter = Router("main");
+
+// Global error handling
+app.use(function*(next) {
+  try { yield next; }
+  catch(e) {
+    // At this level, better stop the server.
+    if(e instanceof errors.APIError)
+      pubErr = e;
+    else
+      var pubErr = new errors.ServerError;
+
+    this.response.status = pubErr.httpCode;
+    this.response.body = pubErr.toPublic();
+
+    logger.error("Critical error! Stopping the instance.", e.data.originalErr || e);
+    shutdown();
+  }
+});
 
 // Routing
 mainRouter.use("/api", require("./server/routes/api"));

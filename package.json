@@ -22,7 +22,11 @@
     "koa": "^1.2.0",
     "koa-bodyparser": "^2.2.0",
     "lucca": "github:sepsten/lucca#v1.0.0",
+    "nizbel": "github:sepsten/nizbel",
+    "nedb": "^1.8.0",
+    "nedb-promise": "^2.0.0",
     "shortid": "^2.2.6",
+    "slug": "^0.9.1",
     "winston": "^2.2.0"
   }
 }
