@@ -8,8 +8,10 @@
     }
   ],
 
+  "dbPath": "db/",
+
   "secret": "abcdefghijklmnopqrstuvwxyz",
 
-  "enableAuth": true,
+  "enableAuth": false,
   "logLevel": "silly"
 }

@@ -8,39 +8,29 @@ var Document = require("./../../models/document"),
     errors = require("./../../errors");
 
 router.get("/", function*() {
-  Document.listDocuments(function(err, list) {
-    if(err) throw err;
-    this.response.body = list;
-  });
+  this.response.body = yield Document.list();
 });
 
 router.get("/*", function*() {
-  Document.getDocument(this.params[0], function(err, doc) {
-    if(err) throw err;
-    res.json(doc);
-  });
+  this.response.body = yield Document.get(this.request.params[0]);
 });
 
 router.post("/*", function*() {
-  req.body.documentId = req.params[0];
-  Document.createDocument(req.body, function(err, doc) {
-    if(err) throw err;
-    this.response.body = doc;
-  });
+  this.request.body.id = this.request.params[0];
+  this.response.status = 201;
+  this.response.body = yield Document.create(this.request.body);
 });
 
 router.put("/*", function*() {
-  Document.updateDocument(req.params[0], req.body, function(err, doc) {
-    if(err) throw err;
-    this.response.body = doc;
-  });
+  this.response.body = yield Document.update(
+    this.request.params[0],
+    this.request.body
+  );
 });
 
 router.delete("/*", function*() {
-  Document.deleteDocument(this.params[0], function(err, doc) {
-    if(err) throw err;
-    this.response.body = doc;
-  });
+  yield Document.delete(this.request.params[0]);
+  this.response.status = 204;
 });
 
 module.exports = router;

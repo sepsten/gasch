@@ -1,67 +1,135 @@
 /**
- * @file Dumb in-memory document store.
+ * @file Document store
  * @author sepsten
  */
 
-var Store = require("./../util/store"),
+var co = require("co"),
+    Datastore = require("nedb"),
     errors = require("./../errors"),
-    util = require("util");
-
-// cf https://github.com/substance/substance/blob/devel/collab/DocumentStore.js
+    util = require("util"),
+    shortid = require("shortid"),
+    path = require("path"),
+    config = require("./../config");
 
 /**
- * Implements Substance's DocumentStore API.
+ * Document store.
+ * IDs are stored in the `id` field.
  *
  * @class
+ * @todo Filesystem-like storage with paths in place of random IDs.
  */
 var DocumentModel = function() {
-  Store.call(this);
+  var db = new Datastore({
+    filename: path.join(__dirname, "../../", config.dbPath, "documents.nedb"),
+    autoload: true
+  });
 
-  this.createDocument = function(props, cb) {
-    // if no ID, generate one
-    if(!props.documentId)
-      props.documentId = Math.round(Math.random() * 1e8).toString(16);
+  /**
+   * Creates a document.
+   * Returns the created document (with its generated ID) in case of success.
+   */
+  this.create = function(doc) {
+    if(!doc.id)
+      doc.id = shortid.generate();
 
-    if(this._exists(props.documentId))
-      return cb(new errors.DocumentAlreadyExists);
-
-    this._save(props.documentId, props);
-    this.getDocument(props.documentId, cb);
+    return new Promise(function(resolve, reject) {
+      db.insert(id2_id(doc), function(err, newDoc) {
+        if(err)
+          if(err.errorType === "uniqueViolated")
+            reject(new errors.DocumentAlreadyExists);
+          else
+            reject(new errors.ServerError({ originalErr: err }));
+        else
+          resolve(_id2id(newDoc));
+      });
+    });
   };
 
-  this.getDocument = function(id, cb) {
-    var doc = this._get(id);
-    if(!doc)
-      return cb(new errors.DocumentNotFound);
-    cb(null, doc);
+  /**
+   * Retrieves a document.
+   */
+  this.get = function(id) {
+    return new Promise(function(resolve, reject) {
+      db.findOne({_id: id}, function(err, doc) {
+        if(err)
+          reject(new errors.ServerError({ originalErr: err }));
+        else if(doc === null)
+          reject(new errors.DocumentNotFound);
+        else
+          resolve(_id2id(doc));
+      });
+    });
   };
 
-  // WARNING: FULL REPLACE
-  this.updateDocument = function(id, newProps, cb) {
-    if(!this._exists(id))
-      return cb(new errors.DocumentNotFound);
-    this._save(id, newProps);
-    this.getDocument(id, cb);
+  /**
+   * Replaces a document's content.
+   * Doesn't return anything in case of success.
+   */
+  this.update = function(doc) {
+    return new Promise(function(resolve, reject) {
+      db.update({_id: doc.id}, id2_id(doc), function(err, nbReplaced) {
+        if(err)
+          reject(new errors.ServerError({ originalErr: err }));
+        else if(nbReplaced === 0)
+          reject(new errors.DocumentNotFound);
+        else
+          resolve();
+      });
+    });
   };
 
-  this.deleteDocument = function(id, cb) {
-    var doc = this._get(id);
-    if(!doc)
-      return cb(new errors.DocumentNotFound);
-    this._delete(id);
-    cb(null, doc);
+  /**
+   * Deletes a document.
+   * Doesn't return anything.
+   */
+  this.delete = function(id) {
+    return new Promise(function(resolve, reject) {
+      db.remove({_id: id}, function(err, nbRemoved) {
+        if(err)
+          reject(new errors.ServerError({ originalErr: err }));
+        else if(nbRemoved === 0)
+          reject(new errors.DocumentNotFound);
+        else
+          resolve();
+      });
+    });
   };
 
-  this.documentExists = function(id, cb) {
-    cb(null, this._exists(id));
-  };
-
-  // Doesn't exist in the DocumentStore API
-  this.listDocuments = function(cb) {
-    cb(null, this._keys());
+  /**
+   * Returns a list of all documents' metadata.
+   */
+  this.list = function() {
+    return new Promise(function(resolve, reject) {
+      db.find({}, { _id: true }, function(err, docs) {
+        if(err)
+          reject(new errors.ServerError({ originalErr: err }));
+        else
+          resolve(docs.map(_id2id));
+      });
+    });
   };
 };
 
-util.inherits(DocumentModel, Store);
+/**
+ * Renames the `_id` property of a given object to `id`.
+ *
+ * @private
+ */
+function _id2id(obj) {
+    obj.id = obj._id;
+    delete obj._id;
+    return obj;
+}
+
+/**
+ * Renames the `id` property of a given object to `_id`.
+ *
+ * @private
+ */
+function id2_id(obj) {
+  obj._id = obj.id;
+  delete obj.id;
+  return obj;
+};
 
 module.exports = new DocumentModel;
