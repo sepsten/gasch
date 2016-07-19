@@ -25,7 +25,9 @@ var bodyParser = require("koa-bodyparser"),
     documentsEndpoint = require("./documents"),
     tokenEndpoint = require("./token"),
     auth = require("./../../authmw"),
-    logger = require("./../../log").logger;
+    logger = require("./../../log").logger,
+    config = require("./../../config"),
+    cors = require("kcors");
 
 // API error handler
 router.use(function*(next) {
@@ -49,6 +51,11 @@ router.use(function*(next) {
       );
   }
 });
+
+if(config.enableCORS) {
+  logger.warn("CORS requests will be accepted.");
+  router.use(cors());
+}
 
 router.use(bodyParser({enableTypes: ["json"]}));
 
