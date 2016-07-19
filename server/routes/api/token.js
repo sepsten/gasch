@@ -23,7 +23,6 @@ var Token = require("./../../models/token"),
     router = require("lucca")("api:token"),
     auth = require("./../../authmw"),
     errors = require("./../../errors"),
-    basicAuth = require("basic-auth"),
     logger = require("./../../log").logger;
 
 router.delete("/", auth(), function*() {
@@ -33,12 +32,12 @@ router.delete("/", auth(), function*() {
 
 // Only endpoint not checked for authentication
 router.get("/", function*() {
-  this.response.set("WWW-Authenticate", "Basic realm=\"Gasch REST API\"");
-
-  let cr = basicAuth(this);
-  if(!cr) throw new errors.LoginCredentialsRequired;
-
-  let token = yield Token.requestToken(cr.name, cr.pass);
+  if(!this.request.body.name || !this.request.body.pass)
+    throw new errors.LoginCredentialsRequired;
+  let token = yield Token.requestToken(
+    this.request.body.name,
+    this.request.body.pass
+  );
   this.response.body = {token};
 });
 

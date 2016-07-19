@@ -19,15 +19,13 @@ limitations under the License.
  * @author sepsten
  */
 
-var bodyParser = require("koa-bodyparser"),
-    router = require("lucca")("api"),
+var router = require("lucca")("api"),
     errors = require("./../../errors"),
     documentsEndpoint = require("./documents"),
     tokenEndpoint = require("./token"),
     auth = require("./../../authmw"),
     logger = require("./../../log").logger,
-    config = require("./../../config"),
-    cors = require("kcors");
+    config = require("./../../config");
 
 // API error handler
 router.use(function*(next) {
@@ -45,19 +43,11 @@ router.use(function*(next) {
       // Error 105 is more a Bad Request error than an authentication error
       logger.error("Unauthenticated request: ",
         this.request.method,
-        this.request.originalUrl,
-        this.request.ip,
+        this.request.path,
         err
       );
   }
 });
-
-if(config.enableCORS) {
-  logger.warn("CORS requests will be accepted.");
-  router.use(cors());
-}
-
-router.use(bodyParser({enableTypes: ["json"]}));
 
 router.use("/token", tokenEndpoint);
 router.use("/documents", auth(), documentsEndpoint);
