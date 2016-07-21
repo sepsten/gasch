@@ -43,13 +43,14 @@ app.use(function*(next) {
     this.response.status = pubErr.httpCode;
     this.response.body = pubErr.toPublic();
 
-    logger.error("Critical error! Stopping the instance.", e.data.originalErr || e);
+    logger.error("Critical error! Stopping the instance.", e);
     shutdown();
   }
 });
 
 // Routing
-mainRouter.use("/api", require("./server/routes/api"));
+var driver = require("./server/routes/drivers/http-json");
+mainRouter.use("/api/v1", driver(require("./server/routes/api"), {cors: true}));
 
 // Boot
 logger.info("Environment: " + config.env);

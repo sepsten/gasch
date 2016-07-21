@@ -32,7 +32,7 @@ n.def(101, "InvalidAuthHeader", {
   httpCode: 401
 });
 
-n.def(102, "WrongLoginCredentials", {
+n.def(102, "WrongCredentials", {
   message: "Wrong login credentials: can't authenticate user.",
   httpCode: 401
 });
@@ -61,6 +61,12 @@ n.def(110, "DocumentNotFound", {
 n.def(111, "DocumentAlreadyExists", {
   message: "Document ID already in use.",
   httpCode: 409
+});
+
+/*** Request errors 120-129 ***/
+n.def(120, "JSONSyntaxError", {
+  message: "", // Should be filled with the original error message
+  httpCode: 400
 });
 
 /*** Other errors 190-199 ***/
