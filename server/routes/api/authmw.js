@@ -19,9 +19,9 @@ limitations under the License.
  * @author sepsten
  */
 
-var config = require("./config"),
-    Token = require("./models/token"),
-    InvalidAuth = require("./errors").InvalidAuthHeader;
+var config = require("./../../config"),
+    Token = require("./../../models/token"),
+    InvalidAuth = require("./../../errors").InvalidAuthHeader;
 
 /**
  * Authentication middleware in the Connect format.

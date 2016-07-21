@@ -21,7 +21,7 @@ limitations under the License.
 
 var Token = require("./../../models/token"),
     router = require("lucca")("api:token"),
-    auth = require("./../../authmw"),
+    auth = require("./authmw"),
     errors = require("./../../errors"),
     logger = require("./../../log").logger;
 
