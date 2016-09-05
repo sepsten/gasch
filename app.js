@@ -49,7 +49,7 @@ app.use(function*(next) {
 });
 
 // Routing
-mainRouter.use("/api", require("./server/routes/api"));
+mainRouter.use("/api/v1", require("./server/routes/api"));
 
 // Boot
 logger.info("Environment: " + config.env);

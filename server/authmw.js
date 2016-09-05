@@ -45,7 +45,7 @@ var AuthMW = function() {
 
       // Check token validity
       let decoded = yield Token.verifyToken(bearer[1]);
-      this.token = decoded; // Valid token!
+      this.request.token = decoded; // Valid token!
       yield next;
     }
     else

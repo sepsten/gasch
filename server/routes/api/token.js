@@ -27,7 +27,7 @@ var Token = require("./../../models/token"),
     logger = require("./../../log").logger;
 
 router.delete("/", auth(), function*() {
-  yield Token.revokeToken(this.token.jti);
+  yield Token.revokeToken(this.request.token.jti);
   this.response.status = 204;
 });
 

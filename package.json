@@ -16,7 +16,7 @@
     "kcors": "^1.2.1",
     "koa": "^1.2.0",
     "koa-bodyparser": "^2.2.0",
-    "lucca": "github:sepsten/lucca#v1.0.0",
+    "lucca": "github:sepsten/lucca#v1.0.2",
     "nedb": "^1.8.0",
     "nizbel": "github:sepsten/nizbel",
     "shortid": "^2.2.6",

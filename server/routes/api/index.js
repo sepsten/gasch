@@ -34,6 +34,11 @@ router.use(function*(next) {
   try {
     yield next;
   } catch(err) {
+    // Catch JSON ParseErrors
+    if(err instanceof SyntaxError) {
+      err = new errors.JSONSyntaxError(err.message);
+    }
+
     if(!(err instanceof errors.APIError) || err.code === 190) throw err;
 
     // Write error to client
