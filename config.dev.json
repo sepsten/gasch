@@ -9,6 +9,7 @@
   ],
 
   "dbPath": "db/",
+  "uploadsDir": "uploads/",
 
   "secret": "abcdefghijklmnopqrstuvwxyz",
 

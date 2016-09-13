@@ -63,9 +63,30 @@ n.def(111, "DocumentAlreadyExists", {
   httpCode: 409
 });
 
-/*** Request errors 120-129 ***/
-n.def(120, "JSONSyntaxError", {
+/*** Asset errors 120-129 ***/
+n.def(120, "AssetNotFound", {
+  message: "Asset not found.",
+  httpCode: 404
+});
+
+n.def(121, "AssetAlreadyExists", {
+  message: "An asset with the same name already exists.",
+  httpCode: 409
+});
+
+n.def(122, "AssetFileRequired", {
+  message: "An \"asset\" file is required.",
+  httpCode: 400
+});
+
+/*** Request errors 150-159 ***/
+n.def(150, "JSONSyntaxError", {
   message: "", // Should be filled with the original error message
+  httpCode: 400
+});
+
+n.def(151, "WrongBodyType", {
+  message: "The wrong body type was sent.",
   httpCode: 400
 });
 

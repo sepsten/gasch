@@ -24,6 +24,7 @@ var bodyParser = require("koa-bodyparser"),
     errors = require("./../../errors"),
     documentsEndpoint = require("./documents"),
     tokenEndpoint = require("./token"),
+    assetsEndpoint = require("./assets"),
     auth = require("./../../authmw"),
     logger = require("./../../log").logger,
     config = require("./../../config"),
@@ -62,10 +63,9 @@ if(config.enableCORS) {
   router.use(cors());
 }
 
-router.use(bodyParser({enableTypes: ["json"]}));
-
-router.use("/token", tokenEndpoint);
-router.use("/documents", auth(), documentsEndpoint);
+router.use("/token", bodyParser({enableTypes: ["json"]}), tokenEndpoint);
+router.use("/documents", auth(), bodyParser({enableTypes: ["json"]}), documentsEndpoint);
+router.use("/assets", auth(), assetsEndpoint);
 
 // Default endpoint
 router.use(function*() {
