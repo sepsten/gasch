@@ -22,9 +22,9 @@ limitations under the License.
 var co = require("co"),
     Datastore = require("nedb"),
     errors = require("./../errors"),
-    util = require("util"),
     shortid = require("shortid"),
     path = require("path"),
+    mutil = require("./util"),
     config = require("./../config");
 
 /**
@@ -49,14 +49,14 @@ var DocumentModel = function() {
       doc.id = shortid.generate();
 
     return new Promise(function(resolve, reject) {
-      db.insert(id2_id(doc), function(err, newDoc) {
+      db.insert(mutil.id2_id(doc), function(err, newDoc) {
         if(err)
           if(err.errorType === "uniqueViolated")
             reject(new errors.DocumentAlreadyExists);
           else
             reject(new errors.ServerError({ originalErr: err }));
         else
-          resolve(_id2id(newDoc));
+          resolve(mutil._id2id(newDoc));
       });
     });
   };
@@ -72,7 +72,7 @@ var DocumentModel = function() {
         else if(doc === null)
           reject(new errors.DocumentNotFound);
         else
-          resolve(_id2id(doc));
+          resolve(mutil._id2id(doc));
       });
     });
   };
@@ -83,7 +83,7 @@ var DocumentModel = function() {
    */
   this.update = function(doc) {
     return new Promise(function(resolve, reject) {
-      db.update({_id: doc.id}, id2_id(doc), function(err, nbReplaced) {
+      db.update({_id: doc.id}, mutil.id2_id(doc), function(err, nbReplaced) {
         if(err)
           reject(new errors.ServerError({ originalErr: err }));
         else if(nbReplaced === 0)
@@ -120,32 +120,10 @@ var DocumentModel = function() {
         if(err)
           reject(new errors.ServerError({ originalErr: err }));
         else
-          resolve(docs.map(_id2id));
+          resolve(docs.map(mutil._id2id));
       });
     });
   };
-};
-
-/**
- * Renames the `_id` property of a given object to `id`.
- *
- * @private
- */
-function _id2id(obj) {
-    obj.id = obj._id;
-    delete obj._id;
-    return obj;
-}
-
-/**
- * Renames the `id` property of a given object to `_id`.
- *
- * @private
- */
-function id2_id(obj) {
-  obj._id = obj.id;
-  delete obj.id;
-  return obj;
 };
 
 module.exports = new DocumentModel;
