@@ -43,7 +43,7 @@ app.use(function*(next) {
     this.response.status = pubErr.httpCode;
     this.response.body = pubErr.toPublic();
 
-    logger.error("Critical error! Stopping the instance.", e.data.originalErr || e);
+    logger.error("Critical error! Stopping the instance.", e, e.data);
     shutdown();
   }
 });
