@@ -25,9 +25,10 @@ var Asset = require("./../../models/asset"),
     formidable = require("koa-formidable"),
     send = require("koa-send"),
     config = require("./../../config"),
+    auth = require("./../../authmw"),
     path = require("path");
 
-router.post("/", 
+router.post("/", auth(),
   formidable({keepExtensions: false, type: "multipart"}), 
   function*() {
     if(!this.request.files.hasOwnProperty("asset"))
@@ -38,6 +39,7 @@ router.post("/",
   }
 );
 
+// Asset access not checked for authentication
 router.get("/:id", function*() {
   if(!(yield Asset.exists(this.request.params.id)))
     throw new errors.AssetNotFound;
@@ -47,7 +49,7 @@ router.get("/:id", function*() {
   );
 });
 
-router.delete("/:id", function*() {
+router.delete("/:id", auth(), function*() {
   yield Asset.delete(this.request.params.id);
   this.response.status = 204;
 });

@@ -65,7 +65,7 @@ if(config.enableCORS) {
 
 router.use("/token", bodyParser({enableTypes: ["json"]}), tokenEndpoint);
 router.use("/documents", auth(), bodyParser({enableTypes: ["json"]}), documentsEndpoint);
-router.use("/assets", auth(), assetsEndpoint);
+router.use("/assets", assetsEndpoint);
 
 // Default endpoint
 router.use(function*() {
