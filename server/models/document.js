@@ -81,15 +81,16 @@ var DocumentModel = function() {
    * Replaces a document's content.
    * Doesn't return anything in case of success.
    */
-  this.update = function(doc) {
+  this.update = function(id, doc) {
     return new Promise(function(resolve, reject) {
-      db.update({_id: doc.id}, mutil.id2_id(doc), function(err, nbReplaced) {
+      doc.id = id;
+      db.update({_id: id}, mutil.id2_id(doc), function(err, nbReplaced) {
         if(err)
           reject(new errors.ServerError({ originalErr: err }));
         else if(nbReplaced === 0)
           reject(new errors.DocumentNotFound);
         else
-          resolve();
+         resolve();
       });
     });
   };
