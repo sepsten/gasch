@@ -23,6 +23,7 @@ var co = require("co"),
     Datastore = require("nedb"),
     errors = require("./../errors"),
     shortid = require("shortid"),
+    uuid = require("uuid/v4"),
     path = require("path"),
     config = require("./../config"),
     fs = require("mz/fs"),
@@ -58,18 +59,21 @@ var AssetModel = function() {
    */
   this.save = function(file) {
     return co(function*() {
-      var newPath = self.getPath(file.name);
+      // Assign a UUID to the file which will be used as a filename
+      var newName = uuid() + path.extname(file.name);
+      // Introduce the new name in the final path
+      var newPath = self.getPath(newName);
 
       // Check if the asset ID is free
-      if(yield self.exists(file.name))
-        throw new errors.AssetAlreadyExists;
+      /*if(yield self.exists(file.name))
+        throw new errors.AssetAlreadyExists;*/
 
       // Move the file
       yield fs.rename(file.path, newPath);
 
       // Return the asset's ID (which is its supplied filename)
-      return file.name;
-    });  
+      return newName;
+    });
   };
 
   /**
@@ -87,7 +91,7 @@ var AssetModel = function() {
    * Deletes an asset.
    *
    * @param {String} id - The asset ID
-   * @returns {Promise} No return value. 
+   * @returns {Promise} No return value.
    */
   this.delete = function(id) {
     return co(function*() {
